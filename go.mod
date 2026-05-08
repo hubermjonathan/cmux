@@ -1,4 +1,4 @@
-module github.com/jon-huber/cmux
+module github.com/hubermjonathan/cmux
 
 go 1.21.1
 

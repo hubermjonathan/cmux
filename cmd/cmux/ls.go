@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/jon-huber/cmux/internal/state"
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/state"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func runLs(args []string) error {

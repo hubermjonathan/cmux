@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func mostRecentSession() string {

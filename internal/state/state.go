@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 type Status string

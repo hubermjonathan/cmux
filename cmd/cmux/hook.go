@@ -5,10 +5,10 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jon-huber/cmux/internal/config"
-	"github.com/jon-huber/cmux/internal/notify"
-	"github.com/jon-huber/cmux/internal/state"
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/config"
+	"github.com/hubermjonathan/cmux/internal/notify"
+	"github.com/hubermjonathan/cmux/internal/state"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func runHook(args []string) error {

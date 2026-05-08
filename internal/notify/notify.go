@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func BellBytes() []byte {

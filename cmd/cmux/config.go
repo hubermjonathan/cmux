@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jon-huber/cmux/internal/config"
+	"github.com/hubermjonathan/cmux/internal/config"
 )
 
 func runConfig(args []string) error {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/jon-huber/cmux/internal/state"
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/state"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func runFocus(args []string) error {

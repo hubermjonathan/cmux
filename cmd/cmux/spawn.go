@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jon-huber/cmux/internal/config"
-	"github.com/jon-huber/cmux/internal/hooks"
-	"github.com/jon-huber/cmux/internal/layout"
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/config"
+	"github.com/hubermjonathan/cmux/internal/hooks"
+	"github.com/hubermjonathan/cmux/internal/layout"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func runSpawn(args []string) error {

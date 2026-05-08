@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/jon-huber/cmux/internal/hooks"
+	"github.com/hubermjonathan/cmux/internal/hooks"
 )
 
 func runHooks(args []string) error {

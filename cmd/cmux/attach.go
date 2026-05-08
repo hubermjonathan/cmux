@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/jon-huber/cmux/internal/tmux"
+	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func runAttach(args []string) error {
