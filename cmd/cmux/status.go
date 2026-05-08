@@ -80,14 +80,6 @@ func printTableStatus(session string) error {
 	return nil
 }
 
-func mostRecentSession() string {
-	sessions, _ := tmux.ListSessions("cmux-")
-	if len(sessions) > 0 {
-		return sessions[len(sessions)-1]
-	}
-	return ""
-}
-
 func getPaneLastEvent(session string, paneID int) int64 {
 	val, err := tmux.GetEnv(session, fmt.Sprintf("CMUX_PANE_%d_LAST_EVENT", paneID))
 	if err != nil {

@@ -6,7 +6,7 @@ tmux-based orchestrator for multiple Claude Code sessions.
 
 ```bash
 cd ~/Code/cmux-cli
-go build -o cmux .
+go build -o cmux ./cmd/cmux
 ```
 
 Install to PATH:
@@ -18,8 +18,8 @@ cp cmux ~/.local/bin/
 Cross-platform:
 
 ```bash
-GOOS=linux GOARCH=amd64 go build -o cmux-linux .
-GOOS=darwin GOARCH=arm64 go build -o cmux-darwin .
+GOOS=linux GOARCH=amd64 go build -o cmux-linux ./cmd/cmux
+GOOS=darwin GOARCH=arm64 go build -o cmux-darwin ./cmd/cmux
 ```
 
 ## Run tests
@@ -30,27 +30,28 @@ go test ./...
 
 ## Project structure
 
-- `main.go` — entry point and command dispatch (switch on os.Args[1])
-- `spawn.go`, `kill.go`, `attach.go`, `ls.go`, `send.go`, `focus.go` — user-facing commands
-- `status.go` — pane status display
-- `hook.go` — hook handlers called by Claude Code (not by users directly)
-- `hooks.go` — `cmux hooks install/uninstall` command
-- `config.go` — `cmux config show/init` command
-- `docs.go` — `cmux docs` command (prints CLI reference for LLMs)
+- `cmd/cmux/main.go` — entry point and command dispatch (switch on os.Args[1])
+- `cmd/cmux/helpers.go` — shared utilities (mostRecentSession, parsePaneID, shellQuote, cwdBasename, joinInts)
+- `cmd/cmux/spawn.go`, `kill.go`, `attach.go`, `ls.go`, `send.go`, `focus.go` — user-facing commands
+- `cmd/cmux/status.go` — pane status display
+- `cmd/cmux/hook.go` — hook handlers called by Claude Code (not by users directly)
+- `cmd/cmux/hooks.go` — `cmux hooks install/uninstall` command
+- `cmd/cmux/config.go` — `cmux config show/init` command
+- `cmd/cmux/docs.go` — `cmux docs` command (prints CLI reference for LLMs)
+- `cmd/cmux/docs/cmux-docs.md` — CLI reference (kept in sync with commands)
 - `internal/tmux/` — thin wrapper around the `tmux` binary
 - `internal/layout/` — grid layout computation for pane arrangement
 - `internal/config/` — reads `~/.config/cmux/config.toml`
 - `internal/state/` — pane state machine via tmux session env vars
 - `internal/hooks/` — patches `~/.claude/settings.json` for lifecycle hooks
 - `internal/notify/` — bell and OSC9 notification helpers
-- `docs/cmux-docs.md` — CLI reference (kept in sync with commands)
 
 ## Adding a new command
 
-1. Add a case to the switch in `main.go`
-2. Create `<name>.go` in the root package with `func run<Name>(args []string) error`
+1. Add a case to the switch in `cmd/cmux/main.go`
+2. Create `cmd/cmux/<name>.go` with `func run<Name>(args []string) error`
 3. Use `internal/tmux` for tmux operations, `internal/state` for pane state
-4. Add to `docs/cmux-docs.md`
+4. Add to `cmd/cmux/docs/cmux-docs.md`
 5. Write tests for any new `internal/` logic
 
 ## How the hook system works

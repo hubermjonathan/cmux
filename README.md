@@ -5,14 +5,14 @@ A tmux-based orchestrator for running multiple Claude Code sessions in a grid la
 ## Install
 
 ```bash
-go install github.com/jon-huber/cmux@latest
+go install github.com/jon-huber/cmux/cmd/cmux@latest
 ```
 
 Or build from source:
 
 ```bash
 cd ~/Code/cmux-cli
-go build -o cmux .
+go build -o cmux ./cmd/cmux
 cp cmux ~/.local/bin/   # or anywhere on your PATH
 ```
 

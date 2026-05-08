@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -156,33 +154,4 @@ func buildLayout(session string, grid layout.Grid) ([]int, error) {
 	tmux.Run("select-layout", "-t", session, "tiled")
 
 	return paneIDs, nil
-}
-
-func parsePaneID(s string) int {
-	s = strings.TrimPrefix(s, "%")
-	id, _ := strconv.Atoi(s)
-	return id
-}
-
-func shellQuote(s string) string {
-	if strings.ContainsAny(s, " \t'\"\\$") {
-		return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
-	}
-	return s
-}
-
-func cwdBasename() string {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "session"
-	}
-	return filepath.Base(wd)
-}
-
-func joinInts(ids []int) string {
-	strs := make([]string, len(ids))
-	for i, id := range ids {
-		strs[i] = strconv.Itoa(id)
-	}
-	return strings.Join(strs, ",")
 }
