@@ -45,6 +45,9 @@ Create `~/.config/cmux/config.toml`:
 args = "--model opus --effort high --permission-mode plan"
 cwd = "."
 
+[layout]
+strategy = "grid"
+
 [notifications]
 bell = true
 osc9 = true
