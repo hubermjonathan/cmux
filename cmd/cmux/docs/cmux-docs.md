@@ -18,6 +18,7 @@ Options:
   --name <name>    Session name (default: cwd basename)
   --prompt <text>  Initial prompt sent to all panes after Claude starts
   --cwd <path>     Working directory for Claude instances
+  --detach, -d     Don't attach after spawning; print attach command instead
 
 Everything after `--` is passed verbatim to `claude`.
 

@@ -15,7 +15,7 @@ import (
 
 func runSpawn(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: cmux spawn <N> [--name <name>] [--prompt <text>] [--cwd <path>] [-- <claude-args>...]")
+		return fmt.Errorf("usage: cmux spawn <N> [--name <name>] [--prompt <text>] [--cwd <path>] [--detach] [-- <claude-args>...]")
 	}
 
 	n, err := strconv.Atoi(args[0])
@@ -23,7 +23,7 @@ func runSpawn(args []string) error {
 		return fmt.Errorf("N must be an integer between 1 and 20")
 	}
 
-	name, prompt, cwd, claudeArgs := parseSpawnFlags(args[1:])
+	name, prompt, cwd, claudeArgs, detach := parseSpawnFlags(args[1:])
 
 	cfg := config.Load("")
 	if cwd == "" {
@@ -87,10 +87,14 @@ func runSpawn(args []string) error {
 		fmt.Sprintf("#(cmux status --tmux --session %s)", sessionName))
 	tmux.Run("set-option", "-t", sessionName, "status-interval", "2")
 
+	if detach {
+		fmt.Printf("session %q spawned (%d panes)\nattach with: cmux attach %s\n", sessionName, n, name)
+		return nil
+	}
 	return tmux.Exec("attach-session", "-t", sessionName)
 }
 
-func parseSpawnFlags(args []string) (name, prompt, cwd, claudeArgs string) {
+func parseSpawnFlags(args []string) (name, prompt, cwd, claudeArgs string, detach bool) {
 	name = cwdBasename()
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
@@ -109,6 +113,8 @@ func parseSpawnFlags(args []string) (name, prompt, cwd, claudeArgs string) {
 			if i < len(args) {
 				cwd = args[i]
 			}
+		case "--detach", "-d":
+			detach = true
 		case "--":
 			claudeArgs = strings.Join(args[i+1:], " ")
 			return
