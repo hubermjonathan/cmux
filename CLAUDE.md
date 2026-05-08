@@ -5,14 +5,8 @@ tmux-based orchestrator for multiple Claude Code sessions.
 ## Build
 
 ```bash
-cd ~/Code/cmux-cli
 go build -o cmux ./cmd/cmux
-```
-
-Install to PATH:
-
-```bash
-cp cmux ~/.local/bin/
+cp cmux ~/.local/bin/   # or anywhere on your PATH
 ```
 
 Cross-platform:
