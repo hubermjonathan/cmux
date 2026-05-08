@@ -11,7 +11,9 @@ go install github.com/jon-huber/cmux@latest
 Or build from source:
 
 ```bash
+cd ~/Code/cmux-cli
 go build -o cmux .
+cp cmux ~/.local/bin/   # or anywhere on your PATH
 ```
 
 ## Quick Start
