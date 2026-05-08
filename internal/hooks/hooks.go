@@ -107,13 +107,13 @@ func IsInstalled(settingsPath string) bool {
 	if hooks == nil {
 		return false
 	}
-	for _, command := range cmuxHooks {
-		entries, _ := hooks["Stop"].([]any)
-		if containsCmuxHook(entries, command) {
-			return true
+	for event, command := range cmuxHooks {
+		entries, _ := hooks[event].([]any)
+		if !containsCmuxHook(entries, command) {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func isCmuxEntry(entry any) bool {

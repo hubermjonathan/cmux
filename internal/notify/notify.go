@@ -16,19 +16,14 @@ func OSC9Bytes(message string) []byte {
 }
 
 func SendBell(paneID int) {
-	tty, err := tmux.PaneTTY(fmt.Sprintf("%d", paneID))
-	if err != nil {
-		return
-	}
-	f, err := os.OpenFile(tty, os.O_WRONLY, 0)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	f.Write(BellBytes())
+	writeToPane(paneID, BellBytes())
 }
 
 func SendOSC9(paneID int, message string) {
+	writeToPane(paneID, OSC9Bytes(message))
+}
+
+func SendAll(paneID int, bell bool, osc9Message string) {
 	tty, err := tmux.PaneTTY(fmt.Sprintf("%d", paneID))
 	if err != nil {
 		return
@@ -38,5 +33,23 @@ func SendOSC9(paneID int, message string) {
 		return
 	}
 	defer f.Close()
-	f.Write(OSC9Bytes(message))
+	if bell {
+		f.Write(BellBytes())
+	}
+	if osc9Message != "" {
+		f.Write(OSC9Bytes(osc9Message))
+	}
+}
+
+func writeToPane(paneID int, data []byte) {
+	tty, err := tmux.PaneTTY(fmt.Sprintf("%d", paneID))
+	if err != nil {
+		return
+	}
+	f, err := os.OpenFile(tty, os.O_WRONLY, 0)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	f.Write(data)
 }

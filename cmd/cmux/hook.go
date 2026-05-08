@@ -41,12 +41,11 @@ func runHook(args []string) error {
 
 	if event == "stop" {
 		cfg := config.Load("")
-		if cfg.Notifications.Bell {
-			notify.SendBell(paneID)
-		}
+		osc9Msg := ""
 		if cfg.Notifications.OSC9 {
-			notify.SendOSC9(paneID, fmt.Sprintf("Claude waiting: pane %s [%s]", paneIDStr, session))
+			osc9Msg = fmt.Sprintf("Claude waiting: pane %s [%s]", paneIDStr, session)
 		}
+		notify.SendAll(paneID, cfg.Notifications.Bell, osc9Msg)
 		if cfg.Notifications.AutoFocus {
 			autoFocusIfSingleWaiter(session, paneID)
 		}
@@ -59,6 +58,6 @@ func runHook(args []string) error {
 func autoFocusIfSingleWaiter(session string, paneID int) {
 	counts := state.CountByStatus(session)
 	if counts[state.Waiting] == 1 {
-		tmux.RunSilent("select-pane", "-t", fmt.Sprintf("%%%d", paneID))
+		tmux.RunSilent("select-pane", "-t", tmux.PaneTarget(paneID))
 	}
 }

@@ -69,6 +69,28 @@ func ListSessions(prefix string) ([]string, error) {
 	return sessions, nil
 }
 
+func GetAllEnv(session string) (map[string]string, error) {
+	out, err := Run("show-environment", "-t", session)
+	if err != nil {
+		return nil, err
+	}
+	env := map[string]string{}
+	for _, line := range strings.Split(out, "\n") {
+		if strings.HasPrefix(line, "-") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			env[parts[0]] = parts[1]
+		}
+	}
+	return env, nil
+}
+
 func PaneTTY(paneID string) (string, error) {
 	return Run("display-message", "-t", "%"+paneID, "-p", "#{pane_tty}")
+}
+
+func PaneTarget(id int) string {
+	return fmt.Sprintf("%%%d", id)
 }

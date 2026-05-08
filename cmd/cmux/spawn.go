@@ -9,6 +9,7 @@ import (
 	"github.com/hubermjonathan/cmux/internal/config"
 	"github.com/hubermjonathan/cmux/internal/hooks"
 	"github.com/hubermjonathan/cmux/internal/layout"
+	"github.com/hubermjonathan/cmux/internal/state"
 	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
@@ -30,13 +31,13 @@ func runSpawn(args []string) error {
 	}
 	mergedArgs := config.MergeArgs(cfg.Claude.Args, claudeArgs)
 
-	sessionName := "cmux-" + name
+	sessionName := sessionPrefix + name
 
-	// Install hooks
 	settingsPath := hooks.ClaudeSettingsPath()
-	hooks.Install(settingsPath)
+	if !hooks.IsInstalled(settingsPath) {
+		hooks.Install(settingsPath)
+	}
 
-	// Create session
 	if tmux.HasSession(sessionName) {
 		return fmt.Errorf("session %q already exists", sessionName)
 	}
@@ -46,7 +47,6 @@ func runSpawn(args []string) error {
 		return fmt.Errorf("failed to create session: %w", err)
 	}
 
-	// Build grid
 	grid := layout.ComputeGrid(n)
 	paneIDs, err := buildLayout(sessionName, grid)
 	if err != nil {
@@ -54,44 +54,39 @@ func runSpawn(args []string) error {
 		return fmt.Errorf("failed to build layout: %w", err)
 	}
 
-	// Store pane mapping
 	tmux.SetEnv(sessionName, "CMUX_PANES", joinInts(paneIDs))
-	for i, id := range paneIDs {
-		tmux.SetEnv(sessionName, fmt.Sprintf("CMUX_PANE_INDEX_%d", i+1), strconv.Itoa(id))
-		tmux.SetEnv(sessionName, fmt.Sprintf("CMUX_PANE_%d_STATUS", id), "idle")
+	for _, id := range paneIDs {
+		state.SetPaneStatus(sessionName, id, state.Idle)
 	}
 
-	// Launch claude in each pane
 	claudeCmd := "claude"
 	if mergedArgs != "" {
 		claudeCmd += " " + mergedArgs
 	}
 	for _, id := range paneIDs {
-		paneTarget := fmt.Sprintf("%%%d", id)
+		target := tmux.PaneTarget(id)
+		var cmd string
 		if cwd != "." && cwd != "" {
-			tmux.Run("send-keys", "-t", paneTarget, fmt.Sprintf("cd %s", shellQuote(cwd)), "Enter")
-			time.Sleep(100 * time.Millisecond)
+			cmd = fmt.Sprintf("cd %s && export CMUX_PANE_ID=%d CMUX_SESSION=%s; %s", shellQuote(cwd), id, sessionName, claudeCmd)
+		} else {
+			cmd = fmt.Sprintf("export CMUX_PANE_ID=%d CMUX_SESSION=%s; %s", id, sessionName, claudeCmd)
 		}
-		exportCmd := fmt.Sprintf("export CMUX_PANE_ID=%d CMUX_SESSION=%s; %s", id, sessionName, claudeCmd)
-		tmux.Run("send-keys", "-t", paneTarget, exportCmd, "Enter")
+		tmux.Run("send-keys", "-t", target, cmd, "Enter")
 	}
 
-	// Send prompt
 	if prompt != "" {
 		time.Sleep(3 * time.Second)
 		for _, id := range paneIDs {
-			paneTarget := fmt.Sprintf("%%%d", id)
-			tmux.Run("send-keys", "-t", paneTarget, "-l", prompt)
-			tmux.Run("send-keys", "-t", paneTarget, "Enter")
+			target := tmux.PaneTarget(id)
+			tmux.Run("send-keys", "-t", target, "-l", prompt)
+			tmux.Run("send-keys", "-t", target, "Enter")
 		}
 	}
 
-	// Configure status bar
 	tmux.Run("set-option", "-t", sessionName, "status-right",
 		fmt.Sprintf("#(cmux status --tmux --session %s)", sessionName))
 	tmux.Run("set-option", "-t", sessionName, "status-interval", "2")
 
-	// Attach
 	return tmux.Exec("attach-session", "-t", sessionName)
 }
 
@@ -123,7 +118,6 @@ func parseSpawnFlags(args []string) (name, prompt, cwd, claudeArgs string) {
 }
 
 func buildLayout(session string, grid layout.Grid) ([]int, error) {
-	// Get the first pane ID (created with new-session)
 	out, err := tmux.Run("list-panes", "-t", session, "-F", "#{pane_id}")
 	if err != nil {
 		return nil, err
@@ -136,13 +130,12 @@ func buildLayout(session string, grid layout.Grid) ([]int, error) {
 		return paneIDs, nil
 	}
 
-	// Split to create remaining panes
 	for i := 1; i < total; i++ {
 		direction := "-v"
 		if len(grid.Rows) == 1 || (len(grid.Rows) == 2 && i <= grid.Rows[0]) {
 			direction = "-h"
 		}
-		target := fmt.Sprintf("%%%d", paneIDs[0])
+		target := tmux.PaneTarget(paneIDs[0])
 		out, err := tmux.Run("split-window", direction, "-t", target, "-P", "-F", "#{pane_id}")
 		if err != nil {
 			return nil, err
@@ -150,7 +143,6 @@ func buildLayout(session string, grid layout.Grid) ([]int, error) {
 		paneIDs = append(paneIDs, parsePaneID(strings.TrimSpace(out)))
 	}
 
-	// Equalize layout
 	tmux.Run("select-layout", "-t", session, "tiled")
 
 	return paneIDs, nil

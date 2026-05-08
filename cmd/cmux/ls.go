@@ -8,7 +8,7 @@ import (
 )
 
 func runLs(args []string) error {
-	sessions, err := tmux.ListSessions("cmux-")
+	sessions, err := tmux.ListSessions(sessionPrefix)
 	if err != nil || len(sessions) == 0 {
 		fmt.Println("no cmux sessions")
 		return nil

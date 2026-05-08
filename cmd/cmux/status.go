@@ -2,12 +2,10 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/hubermjonathan/cmux/internal/state"
-	"github.com/hubermjonathan/cmux/internal/tmux"
 )
 
 func runStatus(args []string) error {
@@ -36,8 +34,8 @@ func runStatus(args []string) error {
 	if session == "" {
 		return fmt.Errorf("no cmux session found")
 	}
-	if !strings.HasPrefix(session, "cmux-") {
-		session = "cmux-" + session
+	if !strings.HasPrefix(session, sessionPrefix) {
+		session = sessionPrefix + session
 	}
 
 	if isTmux {
@@ -63,33 +61,22 @@ func printTmuxStatus(session string) error {
 }
 
 func printTableStatus(session string) error {
-	panes := state.GetPaneList(session)
+	panes := state.GetAllPanes(session)
 	if len(panes) == 0 {
 		return fmt.Errorf("no panes found in session %s", session)
 	}
 	fmt.Printf("%-6s %-10s %-10s %s\n", "PANE", "STATUS", "DURATION", "LAST EVENT")
-	for i, id := range panes {
-		s := state.GetPaneStatus(session, id)
-		lastEvent := getPaneLastEvent(session, id)
+	for i, p := range panes {
 		duration := "-"
-		if lastEvent > 0 {
-			duration = time.Since(time.Unix(lastEvent, 0)).Truncate(time.Second).String()
+		if p.LastEvent > 0 {
+			duration = time.Since(time.Unix(p.LastEvent, 0)).Truncate(time.Second).String()
 		}
-		fmt.Printf("%-6d %-10s %-10s %s\n", i+1, s, duration, getPaneEventName(s))
+		fmt.Printf("%-6d %-10s %-10s %s\n", i+1, p.Status, duration, eventName(p.Status))
 	}
 	return nil
 }
 
-func getPaneLastEvent(session string, paneID int) int64 {
-	val, err := tmux.GetEnv(session, fmt.Sprintf("CMUX_PANE_%d_LAST_EVENT", paneID))
-	if err != nil {
-		return 0
-	}
-	ts, _ := strconv.ParseInt(val, 10, 64)
-	return ts
-}
-
-func getPaneEventName(s state.Status) string {
+func eventName(s state.Status) string {
 	switch s {
 	case state.Working:
 		return "prompt-submit"
